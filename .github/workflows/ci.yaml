@@ -1,0 +1,38 @@
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        go: [ '1.19', '1.20' ]
+    steps:
+      - name: チェックアウト
+        uses: actions/checkout@v3
+
+      - name: Goのセットアップ
+        uses: actions/setup-go@v4
+        with:
+          go-version: ${{ matrix.go }}
+
+      - name: 依存ライブラリの取得
+        run: go mod download
+
+      - name: Lintの実行
+        run: |
+          go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
+          golangci-lint run
+
+      - name: テストの実行とカバレッジレポート生成
+        run: go test -v -coverprofile=coverage.out ./...
+
+      - name: Codecovへのカバレッジレポートアップロード
+        uses: codecov/codecov-action@v3
+        with:
+          file: coverage.out
