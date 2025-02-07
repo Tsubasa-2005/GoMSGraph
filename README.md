@@ -1,8 +1,5 @@
 # GoMSGraph ドキュメント
 
-[![Build Status](https://github.com/Tsubasa-2005/GoMSGraph/actions/workflows/ci.yml/badge.svg)](https://github.com/Tsubasa-2005/GoMSGraph/actions)
-[![Coverage Status](https://codecov.io/gh/Tsubasa-2005/GoMSGraph/branch/main/graph/badge.svg)](https://codecov.io/gh/Tsubasa-2005/GoMSGraph)
-
 ## 概要
 
 このパッケージは、Microsoft Graph API との連携を抽象化するサービス層を提供します。  
