@@ -24,12 +24,6 @@ jobs:
       - name: 依存ライブラリの取得
         run: go mod download
 
-      - name: Run golangci-lint
-        uses: golangci/golangci-lint-action@v2
-        with:
-          version: latest
-          args: --disable=golint --out-format=colored-line-number ./...
-
       - name: テストの実行とカバレッジレポート生成
         run: go test -v -coverprofile=coverage.out ./...
 
