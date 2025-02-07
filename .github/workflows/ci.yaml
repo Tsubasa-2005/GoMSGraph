@@ -2,9 +2,9 @@ name: CI
 
 on:
   push:
-    branches: [ master ]
+    branches: [ main ]
   pull_request:
-    branches: [ master ]
+    branches: [ main ]
 
 jobs:
   build:
@@ -16,7 +16,7 @@ jobs:
       - name: チェックアウト
         uses: actions/checkout@v3
 
-      - name: Goのセットアップ
+      - name: Go のセットアップ
         uses: actions/setup-go@v4
         with:
           go-version: ${{ matrix.go }}
@@ -24,15 +24,16 @@ jobs:
       - name: 依存ライブラリの取得
         run: go mod download
 
-      - name: Lintの実行
-        run: |
-          go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.63.3
-          golangci-lint run
+      - name: Run golangci-lint
+        uses: golangci/golangci-lint-action@v2
+        with:
+          version: latest
+          args: ./...
 
       - name: テストの実行とカバレッジレポート生成
         run: go test -v -coverprofile=coverage.out ./...
 
-      - name: Codecovへのカバレッジレポートアップロード
+      - name: Codecov へのカバレッジレポートアップロード
         uses: codecov/codecov-action@v3
         with:
           file: coverage.out
