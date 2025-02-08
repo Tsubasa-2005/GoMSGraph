@@ -1,78 +1,159 @@
-# GoMSGraph ドキュメント
+# GoMSGraph
 
-## 概要
+GoMSGraph は、Microsoft Graph API を簡単に利用するための Go 言語ライブラリです。  
+Azure AD アプリケーションを用いた認証処理から、ドライブアイテム(フォルダ/ファイル)の操作、SharePoint サイトの検索、大容量ファイルアップロードなどをシンプルなメソッドで実行できます。
 
-このパッケージは、Microsoft Graph API との連携を抽象化するサービス層を提供します。  
-内部では、公式 SDK を利用した `graphhelper` と、公式 SDK でサポートされていない機能（例：Chunk Upload 等）を実現するための独自実装 `httpclient` を組み合わせています。  
-このサービス層は、`GraphService` インターフェースを介して利用でき、利用者は内部実装の詳細に依存することなく機能を利用可能です。
+---
 
-## カスタム HTTP クライアントと将来的な移行について
+## 特徴
 
-現時点では、HTTP クライアント (`httpclient`) のレスポンスは JSON を Go の独自型に変換して利用しています。  
-たとえば、`GetDriveRootChildrenItemsRes` や `UploadSimpleFileRes` といった型をそのまま使用していますが、  
-**将来的に公式の Microsoft Graph SDK が同様の機能（Chunk Upload など）をサポートし、公式の `models` に対応する型が提供された際には、これらの独自型を公式型へ置き換える予定です。**
+- **認証処理の簡略化**  
+  Azure SDK の `azidentity` を利用し、Microsoft Graph API への認証をシンプルに実装。  
+  `GetAppToken` メソッドを通じてアクセストークンを容易に取得可能です。
 
-この置き換えをスムーズに実施できるよう、サービス層のインターフェース (`GraphService`) を通して利用者に機能を提供しており、  
-内部のレスポンス型への直接依存を避ける設計としています。
+- **ドライブ操作**
+  - **フォルダの作成**: `CreateFolder` メソッドで指定のドライブにフォルダを作成
+  - **ルートアイテム一覧の取得**: `GetDriveRootItems` メソッドでドライブのルートアイテムを取得
+  - **アイテム削除**: `DeleteDriveItem` メソッドで任意のアイテム (ファイル/フォルダ) を削除
+
+- **サイト検索**  
+  指定したサイト名で、Microsoft 365 内のサイトを検索する `GetSiteByName` メソッドを提供。
+
+- **大容量ファイルアップロード**  
+  アップロードセッションを作成する `CreateUploadSession` と、  
+  セッションを使った分割アップロードの `UploadFile` メソッドで、大容量ファイルの取り扱いに対応。
+
+- **カスタムロガー対応**  
+  デフォルトロガーには[Uber Zap](https://github.com/uber-go/zap)を用いており、必要に応じてカスタムロガーの差し替えが可能です。
+
+---
 
 ## ディレクトリ構成
 
-- **graphhelper/**
-    - 公式 SDK（`msgraph-sdk-go`）と Azure Identity を利用して、Graph API の認証やサイト検索などを行うラッパを実装しています。
+ライブラリ内の主なファイル構成は以下の通りです。
 
-- **httpclient/**
-    - 公式 SDK で未対応の機能（Chunk Upload 等）を実現するための独自実装。
-    - HTTP レスポンスの JSON をパースして、独自に定義した型（例：`GetDriveRootChildrenItemsRes`、`UploadSimpleFileRes` など）を返します。
-
-- **service/**
-    - `GraphService` インターフェースを定義し、上記コンポーネントを組み合わせたビジネスロジックを実装しています。
-
-## 利用例
-
-以下は、`GraphService` を利用した簡単な利用例です:
-
-```go
-package main
-
-import (
-  "context"
-  "fmt"
-  "os"
-
-  "github.com/Tsubasa-2005/GoMSGraph/service"
-)
-
-func main() {
-  clientId := os.Getenv("CLIENT_ID")
-  tenantId := os.Getenv("TENANT_ID")
-  clientSecret := os.Getenv("CLIENT_SECRET")
-  baseURL := "https://graph.microsoft.com/v1.0"
-
-  // GraphService のインスタンス作成
-  gs, err := service.NewGraphService(clientId, tenantId, clientSecret, baseURL)
-  if err != nil {
-    panic(err)
-  }
-
-  ctx := context.Background()
-
-  // サイトを名前で検索
-  sites, err := gs.GetSiteByName(ctx, "contoso")
-  if err != nil {
-    panic(err)
-  }
-  fmt.Println(sites)
-}
+```
+graphhelper
+├── client.go
+├── drive_folder.go
+├── drive_folder_test.go
+├── drive_items.go
+├── drive_items_test.go
+├── fetch_app_token.go
+├── fetch_app_token_test.go
+├── fetch_sites.go
+├── fetch_sites_test.go
+├── upload_drive.go
+├── upload_drive_session.go
+├── upload_drive_session_test.go
+├── upload_drive_test.go
+└── zaplogger.go
 ```
 
-## 今後の計画
+```
+service
+└── grahpservice.go
+```
 
-- **公式 SDK への移行:**  
-  公式 SDK が本プロジェクトで実現している機能（例：ファイルアップロード、Chunk Upload 等）をサポートし、公式の `models` が利用可能になった場合、  
-  現在の `httpclient` 内で定義している独自型を公式の型へ切り替えます。
+---
 
-- **リファクタリング:**  
-  利用者が `GraphService` インターフェースを通じて機能を利用できるよう、内部実装の変更が外部に影響しないよう努めます。
+## 必要条件
 
-- **エラーハンドリングおよびページング対応の改善:**  
-  HTTP ステータスコードのより柔軟な扱いや、大量データに対応するためのページング機能の実装を検討しています。
+- Go 1.18 以上
+- Microsoft Graph API へのアクセス権を持つ Azure アプリケーション (以下を取得済みであること)
+  - クライアント ID (`AZURE_CLIENT_ID`)
+  - テナント ID (`AZURE_TENANT_ID`)
+  - クライアントシークレット (`AZURE_CLIENT_SECRET`)
+- Microsoft Graph API で使用するスコープ： `https://graph.microsoft.com/.default`
+- 操作対象の OneDrive または SharePoint ドライブ ID (`DRIVE_ID`)  
+  ※ ルートフォルダ以外を指定したい場合は、そのアイテムID (`DRIVE_ROOT_ITEM_ID`) も必要です。
+
+---
+
+## インストール
+
+Go Modules を使っているプロジェクトにて、以下のコマンドを実行してください。
+
+```bash
+go get github.com/Tsubasa-2005/GoMSGraph
+```
+
+---
+
+## 環境変数の設定
+
+このライブラリを使用するには、認証情報やドライブ情報を環境変数で設定します。
+
+- `AZURE_CLIENT_ID`  
+  Azure AD アプリのクライアント ID
+- `AZURE_TENANT_ID`  
+  Azure テナント ID
+- `AZURE_CLIENT_SECRET`  
+  Azure AD アプリのクライアントシークレット
+- `DRIVE_ID`  
+  操作対象となるドライブ ID
+- `DRIVE_ROOT_ITEM_ID`  
+  ルートフォルダや任意フォルダのアイテム ID (フォルダ作成時の親 ID などに利用)
+
+例:
+```bash
+export AZURE_CLIENT_ID="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+export AZURE_TENANT_ID="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+export AZURE_CLIENT_SECRET="xxxxxxxxxxxxxxxxxxxx"
+export DRIVE_ID="xxxxxxxxxxxxxxxxxxxx"
+export DRIVE_ROOT_ITEM_ID="xxxxxxxxxxxxxxxxxxxx"
+```
+
+---
+
+## 使い方
+
+以下は、本ライブラリの主な機能を利用するためのサンプルコード例です。  
+[example.go](./example.go)
+
+
+---
+
+## 主なメソッド一覧
+
+- **認証 / トークン取得**
+  - `GetAppToken(ctx context.Context) (azcore.AccessToken, error)`  
+    アプリケーション権限で Microsoft Graph へアクセスするためのアクセストークンを取得します。
+
+- **ドライブ操作**
+  - `CreateFolder(ctx context.Context, driveID, driveItemID, folderName string) (models.DriveItemable, error)`  
+    ドライブ内で指定したフォルダID(またはルートID)の下に新たなフォルダを作成します。
+  - `GetDriveRootItems(ctx context.Context, driveID string) ([]models.DriveItemable, error)`  
+    指定ドライブのルートに含まれるアイテムを取得します。
+  - `DeleteDriveItem(ctx context.Context, driveID, driveItemID string) error`  
+    指定したアイテムを削除します。
+
+- **サイト検索**
+  - `GetSiteByName(ctx context.Context, siteName string) ([]models.Siteable, error)`  
+    サイト名を検索して一致する SharePoint サイトを返します。
+
+- **大容量ファイルアップロード**
+  - `CreateUploadSession(ctx context.Context, driveID, itemPath string) (models.UploadSessionable, error)`  
+    アップロードセッションを作成し、大容量ファイルの分割アップロードを可能にします。
+  - `UploadFile(uploadSession models.UploadSessionable, file *os.File) (models.DriveItemable, error)`  
+    取得したアップロードセッションを用いてファイルを分割アップロードします。
+
+---
+
+## 注意点
+
+- Microsoft Graph の仕様変更や、依存ライブラリの更新により、インターフェースや挙動が変わる場合があります。
+- 大容量ファイルアップロード時には、ネットワーク切断やセッションの有効期限切れに注意が必要です。本ライブラリでは再開機能を含む実装を行っていますが、必ずしもすべてのケースをカバーできる保証はありません。
+
+---
+
+## ライセンス
+
+このライブラリは [MIT License](./LICENSE) で公開されています。詳細は LICENSE ファイルをご確認ください。
+
+---
+
+## 貢献・お問い合わせ
+
+- バグ報告や新機能追加などの要望は、Issue や Pull Request で歓迎します。
+- ご質問やご不明点がありましたら、GitHub の Issue を通じてお知らせください。
