@@ -3,6 +3,8 @@ package graphhelper
 import (
 	"fmt"
 
+	"go.uber.org/zap"
+
 	"github.com/Azure/azure-sdk-for-go/sdk/azidentity"
 	auth "github.com/microsoft/kiota-authentication-azure-go"
 	msgraphsdk "github.com/microsoftgraph/msgraph-sdk-go"
@@ -11,9 +13,10 @@ import (
 type GraphHelper struct {
 	clientSecretCredential *azidentity.ClientSecretCredential
 	appClient              *msgraphsdk.GraphServiceClient
+	Logger                 *Logger
 }
 
-func NewGraphHelper(clientId, tenantId, clientSecret string) (*GraphHelper, error) {
+func NewGraphHelper(clientId, tenantId, clientSecret string, logger *Logger) (*GraphHelper, error) {
 	credential, authProvider, err := initializeAuth(clientId, tenantId, clientSecret)
 	if err != nil {
 		return nil, err
@@ -24,9 +27,19 @@ func NewGraphHelper(clientId, tenantId, clientSecret string) (*GraphHelper, erro
 	}
 
 	client := msgraphsdk.NewGraphServiceClient(adapter)
+
+	if logger == nil {
+		zapLogger, err := zap.NewProduction()
+		if err != nil {
+			return nil, fmt.Errorf("デフォルトのzapロガーの作成に失敗しました: %w", err)
+		}
+		logger = NewDefaultLogger(zapLogger)
+	}
+
 	return &GraphHelper{
 		clientSecretCredential: credential,
 		appClient:              client,
+		Logger:                 logger,
 	}, nil
 }
 
