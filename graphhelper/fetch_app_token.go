@@ -7,8 +7,8 @@ import (
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore/policy"
 )
 
-func (g *GraphHelper) GetAppToken() (azcore.AccessToken, error) {
-	return g.clientSecretCredential.GetToken(context.Background(), policy.TokenRequestOptions{
+func (g *GraphHelper) GetAppToken(ctx context.Context) (azcore.AccessToken, error) {
+	return g.clientSecretCredential.GetToken(ctx, policy.TokenRequestOptions{
 		Scopes: []string{"https://graph.microsoft.com/.default"},
 	})
 }
