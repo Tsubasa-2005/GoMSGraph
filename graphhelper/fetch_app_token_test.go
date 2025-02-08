@@ -16,10 +16,10 @@ func TestGraphHelper_GetAppToken_Success(t *testing.T) {
 
 	token, err := gh.GetAppToken(context.Background())
 	if err != nil {
-		t.Fatalf("GetAppToken の取得に失敗しました: %v", err)
+		t.Fatalf("Failed to retrieve GetAppToken: %v", err)
 	}
 
-	assert.NotNil(t, token.Token, "取得したトークンが nil です")
+	assert.NotNil(t, token.Token, "The retrieved token is nil")
 	now := time.Now()
-	assert.True(t, token.ExpiresOn.After(now) || token.ExpiresOn.Equal(now), "取得したトークンの有効期限が既に切れています。")
+	assert.True(t, token.ExpiresOn.After(now) || token.ExpiresOn.Equal(now), "The retrieved token is already expired.")
 }

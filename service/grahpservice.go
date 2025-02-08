@@ -27,7 +27,7 @@ type graphServiceImpl struct {
 func NewGraphService(clientId, tenantId, clientSecret string, logger *graphhelper.Logger) (GraphService, error) {
 	gh, err := graphhelper.NewGraphHelper(clientId, tenantId, clientSecret, logger)
 	if err != nil {
-		return nil, fmt.Errorf("GraphHelper の初期化に失敗しました: %w", err)
+		return nil, fmt.Errorf("failed to initialize GraphHelper: %w", err)
 	}
 	return &graphServiceImpl{
 		helper: gh,

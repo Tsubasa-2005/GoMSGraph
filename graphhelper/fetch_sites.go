@@ -18,11 +18,11 @@ func (g *GraphHelper) GetSiteByName(ctx context.Context, siteName string) ([]mod
 	}
 	sitesResponse, err := g.appClient.Sites().Get(ctx, config)
 	if err != nil {
-		return nil, fmt.Errorf("サイト検索エラー: %w", err)
+		return nil, fmt.Errorf("site search error: %w", err)
 	}
 	siteList := sitesResponse.GetValue()
 	if len(siteList) == 0 {
-		return nil, fmt.Errorf("検索クエリ '%s' に一致するサイトが見つかりませんでした", siteName)
+		return nil, fmt.Errorf("no sites found matching the search query '%s'", siteName)
 	}
 	return siteList, nil
 }

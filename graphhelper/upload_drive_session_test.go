@@ -15,12 +15,12 @@ func TestGraphHelper_CreateUploadSession(t *testing.T) {
 
 	driveID := os.Getenv("DRIVE_ID")
 	if driveID == "" {
-		t.Skip("DRIVE_ID が環境変数に設定されていないため、テストをスキップします")
+		t.Skip("DRIVE_ID is not set in environment variables, skipping test")
 	}
 
 	res, err := gh.CreateUploadSession(context.Background(), driveID, "test/test.txt")
 	if err != nil {
-		t.Fatalf("GetFileShareLink の呼び出しに失敗しました: %v", err)
+		t.Fatalf("Failed to call GetFileShareLink: %v", err)
 	}
 
 	assert.NotNil(t, res.GetUploadUrl())

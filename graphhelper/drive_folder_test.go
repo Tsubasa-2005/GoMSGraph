@@ -15,18 +15,18 @@ func TestGraphHelper_CreateFolder(t *testing.T) {
 
 	driveID := os.Getenv("DRIVE_ID")
 	if driveID == "" {
-		t.Skip("DRIVE_ID が環境変数に設定されていないため、テストをスキップします")
+		t.Skip("DRIVE_ID is not set as an environment variable, skipping test")
 	}
 	driveItemID := os.Getenv("DRIVE_ROOT_ITEM_ID")
 	if driveItemID == "" {
-		t.Skip("DRIVE_ITEM_ID が環境変数に設定されていないため、テストをスキップします")
+		t.Skip("DRIVE_ITEM_ID is not set as an environment variable, skipping test")
 	}
 
 	folderName := "TestFolder_" + time.Now().Format("20060102150405")
 
 	res, err := gh.CreateFolder(context.Background(), driveID, driveItemID, folderName)
 	if err != nil {
-		t.Fatalf("CreateFolder の呼び出しに失敗しました: %v", err)
+		t.Fatalf("Failed to call CreateFolder: %v", err)
 	}
 
 	assert.NotNil(t, res.GetId(), "Folder ID should not be nil")

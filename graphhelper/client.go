@@ -23,7 +23,7 @@ func NewGraphHelper(clientId, tenantId, clientSecret string, logger *Logger) (*G
 	}
 	adapter, err := msgraphsdk.NewGraphRequestAdapter(authProvider)
 	if err != nil {
-		return nil, fmt.Errorf("リクエストアダプターの作成に失敗しました: %w", err)
+		return nil, fmt.Errorf("failed to create request adapter: %w", err)
 	}
 
 	client := msgraphsdk.NewGraphServiceClient(adapter)
@@ -31,7 +31,7 @@ func NewGraphHelper(clientId, tenantId, clientSecret string, logger *Logger) (*G
 	if logger == nil {
 		zapLogger, err := zap.NewProduction()
 		if err != nil {
-			return nil, fmt.Errorf("デフォルトのzapロガーの作成に失敗しました: %w", err)
+			return nil, fmt.Errorf("failed to create default zap logger: %w", err)
 		}
 		logger = NewDefaultLogger(zapLogger)
 	}
@@ -46,14 +46,14 @@ func NewGraphHelper(clientId, tenantId, clientSecret string, logger *Logger) (*G
 func initializeAuth(clientId, tenantId, clientSecret string) (*azidentity.ClientSecretCredential, *auth.AzureIdentityAuthenticationProvider, error) {
 	credential, err := azidentity.NewClientSecretCredential(tenantId, clientId, clientSecret, nil)
 	if err != nil {
-		return nil, nil, fmt.Errorf("認証情報の作成に失敗しました: %w", err)
+		return nil, nil, fmt.Errorf("failed to create credentials: %w", err)
 	}
 
 	authProvider, err := auth.NewAzureIdentityAuthenticationProviderWithScopes(credential, []string{
 		"https://graph.microsoft.com/.default",
 	})
 	if err != nil {
-		return nil, nil, fmt.Errorf("認証プロバイダーの作成に失敗しました: %w", err)
+		return nil, nil, fmt.Errorf("failed to create an authentication provider: %w", err)
 	}
 
 	return credential, authProvider, nil

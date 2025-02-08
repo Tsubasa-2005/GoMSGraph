@@ -41,18 +41,18 @@ func TestGraphHelper_GetSiteByName(t *testing.T) {
 
 			sites, err := gh.GetSiteByName(ctx, tt.siteName)
 			if tt.expectError {
-				expectedErrMsg := fmt.Sprintf("検索クエリ '%s' に一致するサイトが見つかりませんでした", tt.siteName)
+				expectedErrMsg := fmt.Sprintf("No sites found matching the search query '%s'", tt.siteName)
 				if err.Error() != expectedErrMsg {
-					t.Errorf("エラーメッセージが期待値と異なります。期待: %q, 実際: %q", expectedErrMsg, err.Error())
+					t.Errorf("The error message is different from what is expected. Expected: %q, Actual: %q", expectedErrMsg, err.Error())
 				} else {
-					t.Logf("期待通りエラーメッセージが返されました: %q", err.Error())
+					t.Logf("The expected error message was returned: %q", err.Error())
 				}
 			} else {
 				if err != nil {
-					t.Fatalf("サイト名 '%s' の取得に失敗しました: %v", tt.siteName, err)
+					t.Fatalf("Failed to retrieve site name '%s': %v", tt.siteName, err)
 				}
 				if len(sites) == 0 {
-					t.Fatalf("サイト名 '%s' でサイトが見つかりませんでした", tt.siteName)
+					t.Fatalf("No site found with site name '%s'", tt.siteName)
 				}
 				for _, site := range sites {
 					id := site.GetId()

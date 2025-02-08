@@ -16,10 +16,10 @@ func TestGraphHelper_UploadFile(t *testing.T) {
 	gh := testutil.SetUpGraphHelper(t)
 	driveID := os.Getenv("DRIVE_ID")
 	if driveID == "" {
-		t.Skip("DRIVE_ID が環境変数に設定されていないため、テストをスキップします")
+		t.Skip("DRIVE_ID is not set as an environment variable, skipping test")
 	}
 
-	// 分割されるサイズとそうでないサイズのファイルをアップロード
+	// Upload both a file size that will be chunked and a size that will not be chunked
 	testCases := []struct {
 		name     string
 		fileSize int
@@ -34,31 +34,31 @@ func TestGraphHelper_UploadFile(t *testing.T) {
 			t.Parallel()
 
 			tmpFile, err := os.CreateTemp("", fmt.Sprintf("upload_test_%s_*.dat", tc.name))
-			assert.NoError(t, err, "一時ファイルの作成に失敗しました: %s", tc.name)
+			assert.NoError(t, err, "Failed to create temporary file: %s", tc.name)
 			defer os.Remove(tmpFile.Name())
 
 			content := bytes.Repeat([]byte(tc.name[:1]), tc.fileSize)
 			_, err = tmpFile.Write(content)
-			assert.NoError(t, err, "ファイルへの書き込みに失敗しました: %s", tc.name)
+			assert.NoError(t, err, "Failed to write to file: %s", tc.name)
 			tmpFile.Close()
 
 			file, err := os.Open(tmpFile.Name())
-			assert.NoError(t, err, "ファイルのオープンに失敗しました: %s", tc.name)
+			assert.NoError(t, err, "Failed to open file: %s", tc.name)
 			defer file.Close()
 
 			itemPath := fmt.Sprintf("test_upload/%s_%d.dat", tc.name, time.Now().UnixNano())
 			uploadSession, err := gh.CreateUploadSession(context.Background(), driveID, itemPath)
-			assert.NoError(t, err, "アップロードセッションの作成に失敗しました: %s", tc.name)
-			assert.NotNil(t, uploadSession.GetUploadUrl(), "UploadUrl が nil です: %s", tc.name)
+			assert.NoError(t, err, "Failed to create an upload session: %s", tc.name)
+			assert.NotNil(t, uploadSession.GetUploadUrl(), "UploadUrl is nil: %s", tc.name)
 
 			driveItem, err := gh.UploadFile(uploadSession, file)
-			assert.NoError(t, err, "UploadFile の実行に失敗しました: %s", tc.name)
-			assert.NotNil(t, driveItem, "アップロード結果が nil です: %s", tc.name)
+			assert.NoError(t, err, "Failed to execute UploadFile: %s", tc.name)
+			assert.NotNil(t, driveItem, "The upload result is nil: %s", tc.name)
 			if size := driveItem.GetSize(); size != nil {
-				assert.Equal(t, int64(tc.fileSize), *size, "アップロード後のサイズが一致しません: %s", tc.name)
+				assert.Equal(t, int64(tc.fileSize), *size, "The size after upload does not match: %s", tc.name)
 			}
 
-			t.Logf("[%s] アップロードされたドライブアイテムの ID: %s", tc.name, *driveItem.GetId())
+			t.Logf("[%s] Uploaded drive item ID: %s", tc.name, *driveItem.GetId())
 		})
 	}
 }
