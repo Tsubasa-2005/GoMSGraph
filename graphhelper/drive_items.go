@@ -19,3 +19,7 @@ func (g *GraphHelper) GetDriveRootItems(ctx context.Context, driveID string) ([]
 
 	return items.GetValue(), nil
 }
+
+func (g *GraphHelper) DeleteDriveItem(ctx context.Context, driveID, driveItemID string) error {
+	return g.appClient.Drives().ByDriveId(driveID).Items().ByDriveItemId(driveItemID).Delete(ctx, nil)
+}
