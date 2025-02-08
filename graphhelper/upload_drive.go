@@ -26,7 +26,6 @@ func (g *GraphHelper) UploadFile(uploadSession models.UploadSessionable, byteStr
 
 	uploadResult := fileUploadTask.Upload(progress)
 	if uploadResult.GetUploadSucceeded() {
-		g.Logger.Infof("Upload complete, item ID: %s", *uploadResult.GetItemResponse().GetId())
 		return uploadResult.GetItemResponse(), nil
 	}
 
@@ -34,11 +33,9 @@ func (g *GraphHelper) UploadFile(uploadSession models.UploadSessionable, byteStr
 
 	resumeResult, err := fileUploadTask.Resume(progress)
 	if err != nil {
-		g.Logger.Errorf("Upload resume failed: %v", err)
 		return nil, fmt.Errorf("upload resume failed: %w", err)
 	}
 	if resumeResult.GetUploadSucceeded() {
-		g.Logger.Infof("Upload resumed complete, item ID: %s", *resumeResult.GetItemResponse().GetId())
 		return resumeResult.GetItemResponse(), nil
 	}
 
@@ -46,7 +43,6 @@ func (g *GraphHelper) UploadFile(uploadSession models.UploadSessionable, byteStr
 	for _, e := range resumeResult.GetResponseErrors() {
 		errMessages = append(errMessages, e.Error())
 	}
-	joinedErrs := strings.Join(errMessages, "; ")
-	g.Logger.Errorf("Upload failed: %s", joinedErrs)
-	return nil, fmt.Errorf("upload failed: %s", joinedErrs)
+
+	return nil, fmt.Errorf("upload failed: %s", strings.Join(errMessages, "; "))
 }
