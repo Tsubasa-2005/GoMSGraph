@@ -2,6 +2,7 @@ package graphhelper
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/microsoftgraph/msgraph-sdk-go/drives"
 	"github.com/microsoftgraph/msgraph-sdk-go/models"
@@ -15,5 +16,10 @@ func (g *GraphHelper) CreateUploadSession(ctx context.Context, driveID, itemPath
 	uploadSessionRequestBody := drives.NewItemItemsItemCreateUploadSessionPostRequestBody()
 	uploadSessionRequestBody.SetItem(itemUploadProperties)
 
-	return g.appClient.Drives().ByDriveId(driveID).Items().ByDriveItemId("root:/"+itemPath+":").CreateUploadSession().Post(ctx, uploadSessionRequestBody, nil)
+	session, err := g.appClient.Drives().ByDriveId(driveID).Items().ByDriveItemId("root:/"+itemPath+":").CreateUploadSession().Post(ctx, uploadSessionRequestBody, nil)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create upload session for drive %s and item path %s: %w", driveID, itemPath, err)
+	}
+
+	return session, nil
 }

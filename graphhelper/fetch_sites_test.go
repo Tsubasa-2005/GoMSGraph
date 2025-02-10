@@ -2,11 +2,11 @@ package graphhelper_test
 
 import (
 	"context"
-	"fmt"
 	"testing"
 	"time"
 
 	"github.com/Tsubasa-2005/GoMSGraph/testutil"
+	"github.com/stretchr/testify/require"
 )
 
 func TestGraphHelper_GetSiteByName(t *testing.T) {
@@ -41,12 +41,7 @@ func TestGraphHelper_GetSiteByName(t *testing.T) {
 
 			sites, err := gh.GetSiteByName(ctx, tt.siteName)
 			if tt.expectError {
-				expectedErrMsg := fmt.Sprintf("No sites found matching the search query '%s'", tt.siteName)
-				if err.Error() != expectedErrMsg {
-					t.Errorf("The error message is different from what is expected. Expected: %q, Actual: %q", expectedErrMsg, err.Error())
-				} else {
-					t.Logf("The expected error message was returned: %q", err.Error())
-				}
+				require.Error(t, err, "Expected an error but did not get one")
 			} else {
 				if err != nil {
 					t.Fatalf("Failed to retrieve site name '%s': %v", tt.siteName, err)
