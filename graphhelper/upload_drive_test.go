@@ -10,6 +10,7 @@ import (
 
 	"github.com/Tsubasa-2005/GoMSGraph/testutil"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestGraphHelper_UploadFile(t *testing.T) {
@@ -48,7 +49,7 @@ func TestGraphHelper_UploadFile(t *testing.T) {
 			assert.NoError(t, err, "Failed to open file: %s", tc.name)
 			defer file.Close()
 
-			itemPath := fmt.Sprintf("test_upload/%s_%d.dat", tc.name, time.Now().UnixNano())
+			itemPath := fmt.Sprintf("%s_%d.dat", tc.name, time.Now().UnixNano())
 			uploadSession, err := gh.CreateUploadSession(context.Background(), driveID, itemPath)
 			assert.NoError(t, err, "Failed to create an upload session: %s", tc.name)
 			assert.NotNil(t, uploadSession.GetUploadUrl(), "UploadUrl is nil: %s", tc.name)
@@ -60,7 +61,9 @@ func TestGraphHelper_UploadFile(t *testing.T) {
 				assert.Equal(t, int64(tc.fileSize), *size, "The size after upload does not match: %s", tc.name)
 			}
 
-			t.Logf("[%s] Uploaded drive item ID: %s", tc.name, *driveItem.GetId())
+			t.Cleanup(func() {
+				require.NoError(t, gh.DeleteDriveItem(context.Background(), driveID, *driveItem.GetId()), "作成したフォルダの削除に失敗しました")
+			})
 		})
 	}
 }

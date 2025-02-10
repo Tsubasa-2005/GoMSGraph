@@ -8,6 +8,7 @@ import (
 
 	"github.com/Tsubasa-2005/GoMSGraph/testutil"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestGraphHelper_CreateFolder(t *testing.T) {
@@ -33,4 +34,10 @@ func TestGraphHelper_CreateFolder(t *testing.T) {
 
 	assert.NotNil(t, res.GetId(), "Folder ID should not be nil")
 	assert.Equal(t, folderName, *res.GetName(), "Folder name should be equal")
+
+	t.Cleanup(func() {
+		t.Cleanup(func() {
+			require.NoError(t, gh.DeleteDriveItem(context.Background(), driveID, *res.GetId()), "作成したフォルダの削除に失敗しました")
+		})
+	})
 }
