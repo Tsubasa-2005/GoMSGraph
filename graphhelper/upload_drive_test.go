@@ -13,6 +13,8 @@ import (
 )
 
 func TestGraphHelper_UploadFile(t *testing.T) {
+	t.Parallel()
+
 	gh := testutil.SetUpGraphHelper(t)
 	driveID := os.Getenv("DRIVE_ID")
 	if driveID == "" {

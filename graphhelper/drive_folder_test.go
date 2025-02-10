@@ -11,6 +11,8 @@ import (
 )
 
 func TestGraphHelper_CreateFolder(t *testing.T) {
+	t.Parallel()
+
 	gh := testutil.SetUpGraphHelper(t)
 
 	driveID := os.Getenv("DRIVE_ID")
