@@ -140,6 +140,32 @@ export DRIVE_ROOT_ITEM_ID="xxxxxxxxxxxxxxxxxxxx"
 
 ---
 
+## ドメインレベルの処理 (service パッケージ)
+
+`graphhelper` パッケージは、Microsoft Graph API への各種リクエストをシンプルなラッパー関数として提供しています。一方、ビジネスロジックやドメイン固有の検証は **service** パッケージで実装されています。  
+この設計により、低レベルな API 呼び出しとドメインロジックの分離が実現され、利用者はシンプルなインターフェースを通じて各種機能を利用できるようになっています。
+
+---
+
+### サンプルコード (DownloadDriveItem の場合)
+
+```go
+func (s *graphServiceImpl) DownloadDriveItem(ctx context.Context, driveID, driveItemID string) ([]byte, error) {
+    // まず対象のドライブアイテムを取得
+    item, err := s.helper.GetDriveItem(ctx, driveID, driveItemID)
+    if err != nil {
+        return nil, fmt.Errorf("failed to retrieve drive item: %w", err)
+    }
+    // ファイルかどうかチェック（フォルダの場合は GetFile() が nil となる）
+    if item.GetFile() == nil {
+        return nil, fmt.Errorf("download is only supported for files, not folders")
+    }
+    // ファイルの場合のみダウンロード処理を実行
+    return s.helper.DownloadDriveItem(ctx, driveID, driveItemID)
+}
+```
+---
+
 ## 注意点
 
 - Microsoft Graph の仕様変更や、依存ライブラリの更新により、インターフェースや挙動が変わる場合があります。
