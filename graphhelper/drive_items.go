@@ -20,6 +20,23 @@ func (g *GraphHelper) GetDriveRootItems(ctx context.Context, driveID string) ([]
 	return items.GetValue(), nil
 }
 
+func (g *GraphHelper) GetDriveItem(ctx context.Context, driveID, driveItemID string) (models.DriveItemable, error) {
+	item, err := g.appClient.Drives().ByDriveId(driveID).Items().ByDriveItemId(driveItemID).Get(ctx, nil)
+	if err != nil {
+		return nil, err
+	}
+	return item, nil
+}
+
 func (g *GraphHelper) DeleteDriveItem(ctx context.Context, driveID, driveItemID string) error {
 	return g.appClient.Drives().ByDriveId(driveID).Items().ByDriveItemId(driveItemID).Delete(ctx, nil)
+}
+
+func (g *GraphHelper) DownloadDriveItem(ctx context.Context, driveID, driveItemID string) ([]byte, error) {
+	bytes, err := g.appClient.Drives().ByDriveId(driveID).Items().ByDriveItemId(driveItemID).Content().Get(ctx, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return bytes, nil
 }
