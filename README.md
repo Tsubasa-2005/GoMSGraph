@@ -125,8 +125,12 @@ export DRIVE_ROOT_ITEM_ID="xxxxxxxxxxxxxxxxxxxx"
     ドライブ内で指定したフォルダID(またはルートID)の下に新たなフォルダを作成します。
   - `GetDriveRootItems(ctx context.Context, driveID string) ([]models.DriveItemable, error)`  
     指定ドライブのルートに含まれるアイテムを取得します。
+  - `GetDriveItem(ctx context.Context, driveID, driveItemID string) (models.DriveItemable, error)`  
+    指定したドライブアイテムの詳細情報を取得します。
   - `DeleteDriveItem(ctx context.Context, driveID, driveItemID string) error`  
     指定したアイテムを削除します。
+  - `DownloadDriveItem(ctx context.Context, driveID, driveItemID string) ([]byte, error)`  
+    ファイルの場合、コンテンツをダウンロードします。フォルダの場合はエラーが返されます。
 
 - **サイト検索**
   - `GetSiteByName(ctx context.Context, siteName string) ([]models.Siteable, error)`  
