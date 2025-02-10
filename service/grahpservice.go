@@ -13,11 +13,13 @@ import (
 type GraphService interface {
 	CreateFolder(ctx context.Context, driveID, driveItemID, folderName string) (models.DriveItemable, error)
 	GetDriveRootItems(ctx context.Context, driveID string) ([]models.DriveItemable, error)
+	GetDriveItem(ctx context.Context, driveID, driveItemID string) (models.DriveItemable, error)
 	DeleteDriveItem(ctx context.Context, driveID, driveItemID string) error
 	GetAppToken(ctx context.Context) (azcore.AccessToken, error)
 	GetSiteByName(ctx context.Context, siteName string) ([]models.Siteable, error)
 	UploadFile(uploadSession models.UploadSessionable, file *os.File) (models.DriveItemable, error)
 	CreateUploadSession(ctx context.Context, driveID, itemPath string) (models.UploadSessionable, error)
+	DownloadDriveItem(ctx context.Context, driveID, driveItemID string) ([]byte, error)
 }
 
 type graphServiceImpl struct {
@@ -42,6 +44,10 @@ func (s *graphServiceImpl) GetDriveRootItems(ctx context.Context, driveID string
 	return s.helper.GetDriveRootItems(ctx, driveID)
 }
 
+func (s *graphServiceImpl) GetDriveItem(ctx context.Context, driveID, driveItemID string) (models.DriveItemable, error) {
+	return s.helper.GetDriveItem(ctx, driveID, driveItemID)
+}
+
 func (s *graphServiceImpl) DeleteDriveItem(ctx context.Context, driveID, driveItemID string) error {
 	return s.helper.DeleteDriveItem(ctx, driveID, driveItemID)
 }
@@ -60,4 +66,17 @@ func (s *graphServiceImpl) UploadFile(uploadSession models.UploadSessionable, fi
 
 func (s *graphServiceImpl) CreateUploadSession(ctx context.Context, driveID, itemPath string) (models.UploadSessionable, error) {
 	return s.helper.CreateUploadSession(ctx, driveID, itemPath)
+}
+
+func (s *graphServiceImpl) DownloadDriveItem(ctx context.Context, driveID, driveItemID string) ([]byte, error) {
+	item, err := s.helper.GetDriveItem(ctx, driveID, driveItemID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to retrieve drive item: %w", err)
+	}
+
+	if item.GetFile() == nil {
+		return nil, fmt.Errorf("download is only supported for files, not folders")
+	}
+
+	return s.helper.DownloadDriveItem(ctx, driveID, driveItemID)
 }
