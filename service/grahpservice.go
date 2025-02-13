@@ -17,8 +17,7 @@ type GraphService interface {
 	DeleteDriveItem(ctx context.Context, driveID, driveItemID string) error
 	GetAppToken(ctx context.Context) (azcore.AccessToken, error)
 	GetSiteByName(ctx context.Context, siteName string) ([]models.Siteable, error)
-	UploadFile(uploadSession models.UploadSessionable, file *os.File) (models.DriveItemable, error)
-	CreateUploadSession(ctx context.Context, driveID, itemPath string) (models.UploadSessionable, error)
+	UploadFile(ctx context.Context, driveID, itemPath string, file *os.File) (models.DriveItemable, error)
 	DownloadDriveItem(ctx context.Context, driveID, driveItemID string) ([]byte, error)
 }
 
@@ -60,12 +59,12 @@ func (s *graphServiceImpl) GetSiteByName(ctx context.Context, siteName string) (
 	return s.helper.GetSiteByName(ctx, siteName)
 }
 
-func (s *graphServiceImpl) UploadFile(uploadSession models.UploadSessionable, file *os.File) (models.DriveItemable, error) {
-	return s.helper.UploadFile(uploadSession, file)
-}
-
-func (s *graphServiceImpl) CreateUploadSession(ctx context.Context, driveID, itemPath string) (models.UploadSessionable, error) {
-	return s.helper.CreateUploadSession(ctx, driveID, itemPath)
+func (s *graphServiceImpl) UploadFile(ctx context.Context, driveID, itemPath string, file *os.File) (models.DriveItemable, error) {
+	session, err := s.helper.CreateUploadSession(ctx, driveID, itemPath)
+	if err != nil {
+		return nil, err
+	}
+	return s.helper.UploadFile(session, file)
 }
 
 func (s *graphServiceImpl) DownloadDriveItem(ctx context.Context, driveID, driveItemID string) ([]byte, error) {
