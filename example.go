@@ -6,8 +6,8 @@ import (
 	"log"
 	"os"
 
-	"github.com/Tsubasa-2005/GoMSGraph/graphhelper"
-	"github.com/Tsubasa-2005/GoMSGraph/service"
+	"github.com/Tsubasa-2005/GoMSGraph/v2/graphhelper"
+	"github.com/Tsubasa-2005/GoMSGraph/v2/service"
 )
 
 func main() {
@@ -84,24 +84,16 @@ func main() {
 	}
 
 	// 6. Example of uploading a file
-	// 6-1. Create an upload session
-	uploadSession, err := svc.CreateUploadSession(ctx, driveID, filePath)
+	file, err := os.Open(filePath)
 	if err != nil {
-		log.Printf("Upload session creation error: %v", err)
+		log.Printf("File open error: %v", err)
 	} else {
-		// 6-2. Open the file to be uploaded
-		file, err := os.Open(filePath)
+		defer file.Close()
+		uploadedItem, err := svc.UploadFile(ctx, driveID, filePath, file)
 		if err != nil {
-			log.Printf("File open error: %v", err)
+			log.Printf("File upload error: %v", err)
 		} else {
-			defer file.Close()
-			// 6-3. Upload the file
-			uploadedItem, err := svc.UploadFile(uploadSession, file)
-			if err != nil {
-				log.Printf("File upload error: %v", err)
-			} else {
-				fmt.Printf("Upload complete: ID = %s, Name = %s\n", *uploadedItem.GetId(), *uploadedItem.GetName())
-			}
+			fmt.Printf("Upload complete: ID = %s, Name = %s\n", *uploadedItem.GetId(), *uploadedItem.GetName())
 		}
 	}
 }

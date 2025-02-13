@@ -6,7 +6,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/Tsubasa-2005/GoMSGraph/testutil"
+	"github.com/Tsubasa-2005/GoMSGraph/v2/testutil"
 	"github.com/stretchr/testify/assert"
 )
 

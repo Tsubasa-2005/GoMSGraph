@@ -1,4 +1,4 @@
-module github.com/Tsubasa-2005/GoMSGraph
+module github.com/Tsubasa-2005/GoMSGraph/v2
 
 go 1.23
 

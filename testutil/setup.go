@@ -6,7 +6,7 @@ import (
 
 	"go.uber.org/zap"
 
-	"github.com/Tsubasa-2005/GoMSGraph/graphhelper"
+	"github.com/Tsubasa-2005/GoMSGraph/v2/graphhelper"
 )
 
 func SetUpGraphHelper(t *testing.T) *graphhelper.GraphHelper {

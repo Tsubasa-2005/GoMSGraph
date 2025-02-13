@@ -6,7 +6,7 @@ import (
 	"os"
 
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore"
-	"github.com/Tsubasa-2005/GoMSGraph/graphhelper"
+	"github.com/Tsubasa-2005/GoMSGraph/v2/graphhelper"
 	"github.com/microsoftgraph/msgraph-sdk-go/models"
 )
 
